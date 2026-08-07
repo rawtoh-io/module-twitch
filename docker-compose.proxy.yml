@@ -1,0 +1,17 @@
+# External reverse proxy mode — joins an existing Docker network so your
+# own reverse proxy (Caddy, Traefik, ...) can reach the API and the SPA.
+#
+#   PROXY_NETWORK=<your-network>   # in .env
+#
+# Proxy configuration:
+#   /api/*, /callback*  → http://twitch-api:10600
+#   everything else     → http://twitch-web:80 (nginx, SPA fallback)
+# Caddy equivalent: see the site block in caddy/module-twitch.caddy.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d --build
+
+networks:
+  default:
+    name: ${PROXY_NETWORK:?PROXY_NETWORK is required}
+    external: true

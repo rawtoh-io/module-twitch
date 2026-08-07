@@ -1,0 +1,12 @@
+# Module Twitch — production reverse proxy (standalone mode).
+# Caddy provisions and renews TLS certificates automatically (Let's Encrypt).
+# Required env: DOMAIN (module served at twitch.<DOMAIN>), ACME_EMAIL.
+#
+# The site block lives in caddy/module-twitch.caddy — reuse it as-is if you
+# run your own Caddy in front of the stack.
+
+{
+	email {$ACME_EMAIL}
+}
+
+import /etc/caddy/module-twitch.caddy

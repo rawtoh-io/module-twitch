@@ -1,0 +1,46 @@
+# Ingress — module served at twitch.$DOMAIN.
+# $DOMAIN is substituted at apply time.
+#
+# Uses the cert-manager ClusterIssuer and the shared `security-headers`
+# Traefik middleware from the main Rawtoh deployment (same namespace).
+# CSP is set by the twitch-web nginx (app-specific).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: twitch
+  namespace: rawtoh
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: rawtoh-security-headers@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts: [twitch.$DOMAIN]
+      secretName: twitch-tls
+  rules:
+    - host: twitch.$DOMAIN
+      http:
+        paths:
+          # Longest prefixes win: API paths → twitch-api, the rest → SPA.
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: twitch-api
+                port:
+                  number: 10600
+          # Rawtoh OIDC callback + Twitch OAuth callback (/callback/twitch)
+          - path: /callback
+            pathType: Prefix
+            backend:
+              service:
+                name: twitch-api
+                port:
+                  number: 10600
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: twitch-web
+                port:
+                  number: 80

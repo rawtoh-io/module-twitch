@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres-twitch
+    ports:
+      - "10602:5432"
+    environment:
+      POSTGRES_USER: rawtoh
+      POSTGRES_PASSWORD: rawtoh
+      POSTGRES_DB: twitch
+    volumes:
+      - postgres-twitch-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres-twitch-data:

@@ -1,0 +1,32 @@
+# Standalone mode — adds Caddy (automatic TLS, reverse-proxies the SPA
+# container and the API).
+#
+# DNS: point twitch.<DOMAIN> to this server; ports 80/443 must be public.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/module-twitch.caddy:/etc/caddy/module-twitch.caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      twitch-web:
+        condition: service_started
+      twitch-api:
+        condition: service_started
+
+volumes:
+  caddy_data:
+  caddy_config:

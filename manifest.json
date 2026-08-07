@@ -1,0 +1,3588 @@
+{
+  "methods": [
+    {
+      "name": "chat.say",
+      "summary": "Send a message to the Twitch chat channel",
+      "params": [
+        {
+          "name": "message",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Message text to send",
+          "required": true
+        },
+        {
+          "name": "reply_to",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Message ID to reply to"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.action",
+      "summary": "Send a /me action message to the Twitch chat",
+      "params": [
+        {
+          "name": "message",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Action message text",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "game.get_by_name",
+      "summary": "Get Twitch game/category info by name",
+      "params": [
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Game name to look up",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "box_art_url": {
+            "type": "string"
+          },
+          "igdb_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "game.get_by_id",
+      "summary": "Get Twitch game/category info by ID",
+      "params": [
+        {
+          "name": "game_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Twitch game ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "box_art_url": {
+            "type": "string"
+          },
+          "igdb_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "game.get_top",
+      "summary": "Get the top games/categories on Twitch",
+      "params": [
+        {
+          "name": "limit",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Max results (default 20)"
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "box_art_url": {
+              "type": "string"
+            },
+            "igdb_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "channel.get_info",
+      "summary": "Get channel information by broadcaster ID",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "game_id": {
+            "type": "string"
+          },
+          "game_name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "channel.update",
+      "summary": "Update channel information (title, game, language, tags)",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "title",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "New stream title"
+        },
+        {
+          "name": "game_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "New game/category ID"
+        },
+        {
+          "name": "language",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Stream language (BCP 47)"
+        },
+        {
+          "name": "tags",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": "Stream tags"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "channel.get_follower_count",
+      "summary": "Get the follower count for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    {
+      "name": "channel.start_commercial",
+      "summary": "Start a commercial on the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "length",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Commercial length in seconds (30, 60, 90, 120, 150, 180)",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "stream.get_by_user_id",
+      "summary": "Get current stream info by user ID (null if offline)",
+      "params": [
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Twitch user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "user_display_name": {
+            "type": "string"
+          },
+          "game_id": {
+            "type": "string"
+          },
+          "game_name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "viewer_count": {
+            "type": "integer"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "ISO 8601 datetime"
+          },
+          "language": {
+            "type": "string"
+          },
+          "is_mature": {
+            "type": "boolean"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "stream.get_by_user_name",
+      "summary": "Get current stream info by username (null if offline)",
+      "params": [
+        {
+          "name": "user_name",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Twitch username",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "user_name": {
+            "type": "string"
+          },
+          "user_display_name": {
+            "type": "string"
+          },
+          "game_id": {
+            "type": "string"
+          },
+          "game_name": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "viewer_count": {
+            "type": "integer"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "ISO 8601 datetime"
+          },
+          "language": {
+            "type": "string"
+          },
+          "is_mature": {
+            "type": "boolean"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "stream.create_marker",
+      "summary": "Create a stream marker at the current position",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "description",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Optional marker description"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "position_seconds": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    {
+      "name": "user.get_by_id",
+      "summary": "Get Twitch user info by user ID",
+      "params": [
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Twitch user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "profile_image_url": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "broadcaster_type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "user.get_by_name",
+      "summary": "Get Twitch user info by username",
+      "params": [
+        {
+          "name": "user_name",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Twitch username",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "display_name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "profile_image_url": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "broadcaster_type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "clips.create",
+      "summary": "Create a clip from the current stream",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "clip_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "clips.get",
+      "summary": "Get clip information by clip ID",
+      "params": [
+        {
+          "name": "clip_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Clip ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "embed_url": {
+            "type": "string"
+          },
+          "broadcaster_id": {
+            "type": "string"
+          },
+          "broadcaster_display_name": {
+            "type": "string"
+          },
+          "creator_id": {
+            "type": "string"
+          },
+          "creator_display_name": {
+            "type": "string"
+          },
+          "game_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "view_count": {
+            "type": "integer"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "thumbnail_url": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.ban",
+      "summary": "Permanently ban a user from the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to ban",
+          "required": true
+        },
+        {
+          "name": "reason",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Ban reason"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.timeout",
+      "summary": "Timeout a user for a specified duration",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to timeout",
+          "required": true
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Timeout duration in seconds",
+          "required": true
+        },
+        {
+          "name": "reason",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Timeout reason"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.unban",
+      "summary": "Unban a user from the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to unban",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.get_moderators",
+      "summary": "Get the list of moderators for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "string"
+            },
+            "user_name": {
+              "type": "string"
+            },
+            "user_display_name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.get_banned",
+      "summary": "Get the list of banned users for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "string"
+            },
+            "user_name": {
+              "type": "string"
+            },
+            "user_display_name": {
+              "type": "string"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string"
+            },
+            "expires_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.add_moderator",
+      "summary": "Add a moderator to the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to make moderator",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.remove_moderator",
+      "summary": "Remove a moderator from the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to remove as moderator",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.delete_messages",
+      "summary": "Delete chat messages (all or specific message by ID)",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "message_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Specific message ID to delete (omit to clear all)"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.shield_mode_status",
+      "summary": "Get the shield mode status for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "is_active": {
+            "type": "boolean"
+          },
+          "last_activated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "moderation.update_shield_mode",
+      "summary": "Activate or deactivate shield mode",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "activate",
+          "schema": {
+            "type": "boolean"
+          },
+          "summary": "true to activate, false to deactivate",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "is_active": {
+            "type": "boolean"
+          },
+          "last_activated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "polls.create",
+      "summary": "Create a poll on the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "title",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Poll question",
+          "required": true
+        },
+        {
+          "name": "choices",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": "Poll choices (min 2)",
+          "required": true
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Poll duration in seconds (15-1800)",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "votes": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "polls.end",
+      "summary": "End an active poll",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "poll_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Poll ID to end",
+          "required": true
+        },
+        {
+          "name": "show_result",
+          "schema": {
+            "type": "boolean"
+          },
+          "summary": "Show results (default true)"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "votes": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "started_at": {
+            "type": "string"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "predictions.create",
+      "summary": "Create a prediction on the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "title",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Prediction question",
+          "required": true
+        },
+        {
+          "name": "outcomes",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "summary": "Outcome titles (min 2)",
+          "required": true
+        },
+        {
+          "name": "duration",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Auto-lock after N seconds",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "users": {
+                  "type": "integer"
+                },
+                "channel_points": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "status": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "predictions.lock",
+      "summary": "Lock a prediction (stop accepting bets)",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "prediction_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Prediction ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "predictions.resolve",
+      "summary": "Resolve a prediction with a winning outcome",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "prediction_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Prediction ID",
+          "required": true
+        },
+        {
+          "name": "outcome_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Winning outcome ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "predictions.cancel",
+      "summary": "Cancel a prediction and refund all points",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "prediction_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Prediction ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "raids.start",
+      "summary": "Start a raid to another channel",
+      "params": [
+        {
+          "name": "from_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Your broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "to_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Target broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "created_at": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "raids.cancel",
+      "summary": "Cancel a pending raid",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "search.channels",
+      "summary": "Search for Twitch channels",
+      "params": [
+        {
+          "name": "query",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Search query",
+          "required": true
+        },
+        {
+          "name": "limit",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Max results (default 20)"
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "display_name": {
+              "type": "string"
+            },
+            "game_id": {
+              "type": "string"
+            },
+            "game_name": {
+              "type": "string"
+            },
+            "language": {
+              "type": "string"
+            },
+            "is_live": {
+              "type": "boolean"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "search.categories",
+      "summary": "Search for Twitch game/category names",
+      "params": [
+        {
+          "name": "query",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Search query",
+          "required": true
+        },
+        {
+          "name": "limit",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Max results (default 20)"
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "box_art_url": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "whispers.send",
+      "summary": "Send a whisper (direct message) to a user",
+      "params": [
+        {
+          "name": "from_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Sender user ID",
+          "required": true
+        },
+        {
+          "name": "to_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Recipient user ID",
+          "required": true
+        },
+        {
+          "name": "message",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Whisper message text",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "channel_points.get_rewards",
+      "summary": "Get all custom channel point rewards",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "cost": {
+              "type": "integer"
+            },
+            "prompt": {
+              "type": "string"
+            },
+            "is_enabled": {
+              "type": "boolean"
+            },
+            "is_paused": {
+              "type": "boolean"
+            },
+            "background_color": {
+              "type": "string"
+            },
+            "auto_fulfill": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "channel_points.create_reward",
+      "summary": "Create a custom channel point reward",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "title",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Reward title",
+          "required": true
+        },
+        {
+          "name": "cost",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Channel point cost",
+          "required": true
+        },
+        {
+          "name": "prompt",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User prompt text"
+        },
+        {
+          "name": "is_enabled",
+          "schema": {
+            "type": "boolean"
+          },
+          "summary": "Enable the reward"
+        },
+        {
+          "name": "background_color",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Hex color (#RRGGBB)"
+        },
+        {
+          "name": "auto_fulfill",
+          "schema": {
+            "type": "boolean"
+          },
+          "summary": "Auto-fulfill redemptions"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "integer"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "is_enabled": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "vips.get",
+      "summary": "Get the list of VIPs for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "string"
+            },
+            "user_name": {
+              "type": "string"
+            },
+            "user_display_name": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "vips.add",
+      "summary": "Add a VIP to the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to add as VIP",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "vips.remove",
+      "summary": "Remove a VIP from the channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "user_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to remove as VIP",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.get_chatters",
+      "summary": "Get the list of users in the chat",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "chatters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "user_id": {
+                  "type": "string"
+                },
+                "user_name": {
+                  "type": "string"
+                },
+                "user_display_name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.send_announcement",
+      "summary": "Send an announcement to the chat",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "message",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Announcement message",
+          "required": true
+        },
+        {
+          "name": "color",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Color: primary, blue, green, orange, purple"
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.shoutout",
+      "summary": "Shoutout another user in chat",
+      "params": [
+        {
+          "name": "from_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "to_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "User ID to shoutout",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "subscriptions.get_count",
+      "summary": "Get the subscription count and point total for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          },
+          "points": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    {
+      "name": "bits.get_leaderboard",
+      "summary": "Get the bits leaderboard for a channel",
+      "params": [
+        {
+          "name": "broadcaster_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Broadcaster user ID",
+          "required": true
+        },
+        {
+          "name": "count",
+          "schema": {
+            "type": "integer"
+          },
+          "summary": "Max entries (default 10)"
+        }
+      ],
+      "result": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "user_id": {
+              "type": "string"
+            },
+            "user_name": {
+              "type": "string"
+            },
+            "user_display_name": {
+              "type": "string"
+            },
+            "rank": {
+              "type": "integer"
+            },
+            "score": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "ping",
+      "summary": "Health check. Returns \"pong\".",
+      "result": {
+        "type": "string"
+      }
+    },
+    {
+      "name": "event.subscribe",
+      "summary": "Subscribe to an event by name. Returns a subscription ID used to identify incoming event notifications.",
+      "params": [
+        {
+          "name": "name",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "Event name to subscribe to",
+          "required": true
+        }
+      ],
+      "result": {
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    {
+      "name": "event.unsubscribe",
+      "summary": "Unsubscribe from a previously subscribed event.",
+      "params": [
+        {
+          "name": "subscription_id",
+          "schema": {
+            "type": "string"
+          },
+          "summary": "The subscription ID to cancel",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "chat.message",
+      "summary": "Emitted when a chat message is received",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Twitch message ID"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "channel_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Channel ID"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Epoch in milliseconds"
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "User chat color (hex)"
+          },
+          "is_cheer": {
+            "type": "boolean",
+            "description": "Whether the message contains a cheer"
+          },
+          "bits": {
+            "type": "integer",
+            "description": "Number of bits"
+          },
+          "is_first": {
+            "type": "boolean",
+            "description": "Whether this is the user's first message"
+          },
+          "is_returning_chatter": {
+            "type": "boolean",
+            "description": "Whether the user is a returning chatter"
+          },
+          "is_reply": {
+            "type": "boolean",
+            "description": "Whether this message is a reply"
+          },
+          "parent_message_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ID of the parent message being replied to"
+          },
+          "parent_message_text": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Text of the parent message being replied to"
+          },
+          "is_broadcaster": {
+            "type": "boolean",
+            "description": "Whether the user is the broadcaster"
+          },
+          "is_mod": {
+            "type": "boolean",
+            "description": "Whether the user is a moderator"
+          },
+          "is_subscriber": {
+            "type": "boolean",
+            "description": "Whether the user is a subscriber"
+          },
+          "is_vip": {
+            "type": "boolean",
+            "description": "Whether the user is a VIP"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.action",
+      "summary": "Emitted when a /me action message is sent",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "channel_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Channel ID"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "timestamp": {
+            "type": "integer",
+            "description": "Epoch timestamp in milliseconds"
+          },
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "User chat color (hex)"
+          },
+          "is_broadcaster": {
+            "type": "boolean",
+            "description": "Whether the user is the broadcaster"
+          },
+          "is_mod": {
+            "type": "boolean",
+            "description": "Whether the user is a moderator"
+          },
+          "is_subscriber": {
+            "type": "boolean",
+            "description": "Whether the user is a subscriber"
+          },
+          "is_vip": {
+            "type": "boolean",
+            "description": "Whether the user is a VIP"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.sub",
+      "summary": "Emitted when a user subscribes to the channel",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "plan": {
+            "type": "string",
+            "description": "1000, 2000, 3000, or Prime"
+          },
+          "plan_name": {
+            "type": "string",
+            "description": "Subscription plan display name"
+          },
+          "is_prime": {
+            "type": "boolean",
+            "description": "Whether it is a Prime subscription"
+          },
+          "months": {
+            "type": "integer",
+            "description": "Number of subscription months"
+          },
+          "streak": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Current subscription streak in months"
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Message text"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.resub",
+      "summary": "Emitted when a user resubscribes to the channel",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "plan": {
+            "type": "string",
+            "description": "Subscription tier (1000, 2000, 3000, or Prime)"
+          },
+          "plan_name": {
+            "type": "string",
+            "description": "Subscription plan display name"
+          },
+          "is_prime": {
+            "type": "boolean",
+            "description": "Whether it is a Prime subscription"
+          },
+          "months": {
+            "type": "integer",
+            "description": "Number of subscription months"
+          },
+          "streak": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Current subscription streak in months"
+          },
+          "message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Message text"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.sub_gift",
+      "summary": "Emitted when a user gifts a subscription",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "Recipient user ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Recipient username"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "plan": {
+            "type": "string",
+            "description": "Subscription tier (1000, 2000, 3000, or Prime)"
+          },
+          "plan_name": {
+            "type": "string",
+            "description": "Subscription plan display name"
+          },
+          "months": {
+            "type": "integer",
+            "description": "Number of subscription months"
+          },
+          "gift_duration": {
+            "type": "integer",
+            "description": "Gift subscription duration in months"
+          },
+          "gifter": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter username"
+          },
+          "gifter_user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter user ID"
+          },
+          "gifter_display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter display name"
+          },
+          "gifter_gift_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Total gifts given by the gifter"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.community_sub",
+      "summary": "Emitted when a user gifts multiple subscriptions to the community",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "count": {
+            "type": "integer",
+            "description": "Number of subs gifted"
+          },
+          "plan": {
+            "type": "string",
+            "description": "Subscription tier (1000, 2000, 3000, or Prime)"
+          },
+          "gifter": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter username"
+          },
+          "gifter_user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter user ID"
+          },
+          "gifter_display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter display name"
+          },
+          "gifter_gift_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Total gifts given by the gifter"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.sub_extend",
+      "summary": "Emitted when a user extends their subscription",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "plan": {
+            "type": "string",
+            "description": "Subscription tier (1000, 2000, 3000, or Prime)"
+          },
+          "months": {
+            "type": "integer",
+            "description": "Number of subscription months"
+          },
+          "end_month": {
+            "type": "integer",
+            "description": "Month number (1=Jan, 12=Dec)"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.raid",
+      "summary": "Emitted when the channel receives a raid",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "viewer_count": {
+            "type": "integer",
+            "description": "Number of viewers"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.ban",
+      "summary": "Emitted when a user is permanently banned",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.timeout",
+      "summary": "Emitted when a user is timed out",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "Timeout duration in seconds"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.message_remove",
+      "summary": "Emitted when a single message is deleted",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "message_id": {
+            "type": "string",
+            "description": "Message ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.chat_clear",
+      "summary": "Emitted when the entire chat is cleared",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.whisper",
+      "summary": "Emitted when a whisper (direct message) is received",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.announcement",
+      "summary": "Emitted when an announcement is sent in the chat",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "color": {
+            "type": "string",
+            "description": "PRIMARY, BLUE, GREEN, ORANGE, or PURPLE"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.join",
+      "summary": "Emitted when a user joins the chat",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.part",
+      "summary": "Emitted when a user leaves the chat",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          }
+        }
+      }
+    },
+    {
+      "name": "chat.bits_badge_upgrade",
+      "summary": "Emitted when a user upgrades their bits badge",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "channel": {
+            "type": "string",
+            "description": "Channel name"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "threshold": {
+            "type": "integer",
+            "description": "New bits badge threshold"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.stream_online",
+      "summary": "Emitted when the stream goes live (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "broadcaster_name": {
+            "type": "string",
+            "description": "Broadcaster username"
+          },
+          "broadcaster_display_name": {
+            "type": "string",
+            "description": "Broadcaster display name"
+          },
+          "type": {
+            "type": "string",
+            "description": "live, playlist, or watch_party"
+          },
+          "started_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 8601 datetime"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.stream_offline",
+      "summary": "Emitted when the stream goes offline (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "broadcaster_name": {
+            "type": "string",
+            "description": "Broadcaster username"
+          },
+          "broadcaster_display_name": {
+            "type": "string",
+            "description": "Broadcaster display name"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_update",
+      "summary": "Emitted when channel info is updated (title, category, etc.)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "broadcaster_name": {
+            "type": "string",
+            "description": "Broadcaster username"
+          },
+          "broadcaster_display_name": {
+            "type": "string",
+            "description": "Broadcaster display name"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "category_id": {
+            "type": "string",
+            "description": "Game or category ID"
+          },
+          "category_name": {
+            "type": "string",
+            "description": "Game or category name"
+          },
+          "language": {
+            "type": "string",
+            "description": "Stream language code"
+          },
+          "content_classification_labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Content classification labels"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_follow",
+      "summary": "Emitted when a user follows the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "followed_at": {
+            "type": "string",
+            "description": "ISO 8601 datetime"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_subscribe",
+      "summary": "Emitted when a user subscribes to the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "tier": {
+            "type": "string",
+            "description": "1000, 2000, or 3000"
+          },
+          "is_gift": {
+            "type": "boolean",
+            "description": "Whether the subscription was gifted"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_subscription_gift",
+      "summary": "Emitted when a user gifts subscriptions (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "gifter_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter user ID"
+          },
+          "gifter_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter username"
+          },
+          "gifter_display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Gifter display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "tier": {
+            "type": "string",
+            "description": "Subscription tier (1000, 2000, or 3000)"
+          },
+          "amount": {
+            "type": "integer",
+            "description": "Number of gift subscriptions"
+          },
+          "cumulative_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Total cumulative gifts from this gifter"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "description": "Whether the action was anonymous"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_subscription_message",
+      "summary": "Emitted when a subscriber sends a resub message (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "tier": {
+            "type": "string",
+            "description": "Subscription tier (1000, 2000, or 3000)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "cumulative_months": {
+            "type": "integer",
+            "description": "Total cumulative months subscribed"
+          },
+          "streak_months": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Current subscription streak in months"
+          },
+          "duration_months": {
+            "type": "integer",
+            "description": "Subscription duration in months"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_cheer",
+      "summary": "Emitted when a user cheers with bits (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "bits": {
+            "type": "integer",
+            "description": "Number of bits"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message text"
+          },
+          "is_anonymous": {
+            "type": "boolean",
+            "description": "Whether the action was anonymous"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_raid",
+      "summary": "Emitted when the channel receives a raid (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "raider_id": {
+            "type": "string",
+            "description": "Raider user ID"
+          },
+          "raider_name": {
+            "type": "string",
+            "description": "Raider username"
+          },
+          "raider_display_name": {
+            "type": "string",
+            "description": "Raider display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "viewers": {
+            "type": "integer",
+            "description": "Number of viewers in the raid"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_ban",
+      "summary": "Emitted when a user is banned from the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "moderator_id": {
+            "type": "string",
+            "description": "Moderator user ID"
+          },
+          "moderator_name": {
+            "type": "string",
+            "description": "Moderator username"
+          },
+          "moderator_display_name": {
+            "type": "string",
+            "description": "Moderator display name"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Ban or timeout reason"
+          },
+          "banned_at": {
+            "type": "string",
+            "description": "ISO 8601 datetime"
+          },
+          "ends_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ISO 8601 datetime, null if permanent"
+          },
+          "is_permanent": {
+            "type": "boolean",
+            "description": "Whether the ban is permanent"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_unban",
+      "summary": "Emitted when a user is unbanned from the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "moderator_id": {
+            "type": "string",
+            "description": "Moderator user ID"
+          },
+          "moderator_name": {
+            "type": "string",
+            "description": "Moderator username"
+          },
+          "moderator_display_name": {
+            "type": "string",
+            "description": "Moderator display name"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_moderator_add",
+      "summary": "Emitted when a moderator is added to the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_moderator_remove",
+      "summary": "Emitted when a moderator is removed from the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_reward_redemption_add",
+      "summary": "Emitted when a channel point reward is redeemed (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Redemption ID"
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "Username (login name)"
+          },
+          "user_display_name": {
+            "type": "string",
+            "description": "User display name"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "input": {
+            "type": "string",
+            "description": "User input text"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status"
+          },
+          "reward_id": {
+            "type": "string",
+            "description": "Channel point reward ID"
+          },
+          "reward_title": {
+            "type": "string",
+            "description": "Channel point reward title"
+          },
+          "reward_cost": {
+            "type": "integer",
+            "description": "Channel point reward cost"
+          },
+          "reward_prompt": {
+            "type": "string",
+            "description": "Channel point reward prompt text"
+          },
+          "redeemed_at": {
+            "type": "string",
+            "description": "ISO 8601 datetime"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_poll_begin",
+      "summary": "Emitted when a poll starts on the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title"
+                }
+              }
+            },
+            "description": "List of poll choices"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "ends_at": {
+            "type": "string",
+            "description": "End time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_poll_end",
+      "summary": "Emitted when a poll ends on the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title"
+                },
+                "total_votes": {
+                  "type": "integer",
+                  "description": "Total number of votes"
+                }
+              }
+            },
+            "description": "List of poll choices"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "ended_at": {
+            "type": "string",
+            "description": "End time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_prediction_begin",
+      "summary": "Emitted when a prediction starts on the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title"
+                },
+                "color": {
+                  "type": "string",
+                  "description": "User chat color (hex)"
+                }
+              }
+            },
+            "description": "List of prediction outcomes"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "locks_at": {
+            "type": "string",
+            "description": "Lock time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_prediction_lock",
+      "summary": "Emitted when a prediction is locked (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title"
+                },
+                "color": {
+                  "type": "string",
+                  "description": "User chat color (hex)"
+                },
+                "users": {
+                  "type": "integer",
+                  "description": "Number of users who participated"
+                },
+                "channel_points": {
+                  "type": "integer",
+                  "description": "Total channel points wagered"
+                }
+              }
+            },
+            "description": "List of prediction outcomes"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "locked_at": {
+            "type": "string",
+            "description": "Lock time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_prediction_end",
+      "summary": "Emitted when a prediction ends on the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title"
+          },
+          "outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title"
+                },
+                "color": {
+                  "type": "string",
+                  "description": "User chat color (hex)"
+                },
+                "users": {
+                  "type": "integer",
+                  "description": "Number of users who participated"
+                },
+                "channel_points": {
+                  "type": "integer",
+                  "description": "Total channel points wagered"
+                }
+              }
+            },
+            "description": "List of prediction outcomes"
+          },
+          "winning_outcome_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ID of the winning outcome"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "ended_at": {
+            "type": "string",
+            "description": "End time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_hype_train_begin",
+      "summary": "Emitted when a hype train starts (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "level": {
+            "type": "integer",
+            "description": "Current hype train level"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total contribution points"
+          },
+          "progress": {
+            "type": "integer",
+            "description": "Progress toward next level"
+          },
+          "goal": {
+            "type": "integer",
+            "description": "Goal points for next level"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "expires_at": {
+            "type": "string",
+            "description": "Expiration time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_hype_train_end",
+      "summary": "Emitted when a hype train ends (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier"
+          },
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "level": {
+            "type": "integer",
+            "description": "Current hype train level"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total contribution points"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "ended_at": {
+            "type": "string",
+            "description": "End time (ISO 8601)"
+          },
+          "cooldown_ends_at": {
+            "type": "string",
+            "description": "Cooldown end time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_shoutout_create",
+      "summary": "Emitted when a shoutout is sent from the channel (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "moderator_id": {
+            "type": "string",
+            "description": "Moderator user ID"
+          },
+          "moderator_name": {
+            "type": "string",
+            "description": "Moderator username"
+          },
+          "moderator_display_name": {
+            "type": "string",
+            "description": "Moderator display name"
+          },
+          "target_id": {
+            "type": "string",
+            "description": "Target user ID"
+          },
+          "target_name": {
+            "type": "string",
+            "description": "Target username"
+          },
+          "target_display_name": {
+            "type": "string",
+            "description": "Target display name"
+          },
+          "viewer_count": {
+            "type": "integer",
+            "description": "Number of viewers"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_shoutout_receive",
+      "summary": "Emitted when the channel receives a shoutout (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "from_broadcaster_id": {
+            "type": "string",
+            "description": "Source broadcaster user ID"
+          },
+          "from_broadcaster_name": {
+            "type": "string",
+            "description": "Source broadcaster username"
+          },
+          "from_broadcaster_display_name": {
+            "type": "string",
+            "description": "Source broadcaster display name"
+          },
+          "viewer_count": {
+            "type": "integer",
+            "description": "Number of viewers"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          }
+        }
+      }
+    },
+    {
+      "name": "eventsub.channel_ad_break_begin",
+      "summary": "Emitted when an ad break starts (EventSub)",
+      "payload": {
+        "type": "object",
+        "properties": {
+          "broadcaster_id": {
+            "type": "string",
+            "description": "Broadcaster user ID"
+          },
+          "broadcaster_name": {
+            "type": "string",
+            "description": "Broadcaster username"
+          },
+          "broadcaster_display_name": {
+            "type": "string",
+            "description": "Broadcaster display name"
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "description": "Ad break duration in seconds"
+          },
+          "started_at": {
+            "type": "string",
+            "description": "Start time (ISO 8601)"
+          },
+          "is_automatic": {
+            "type": "boolean",
+            "description": "Whether the action was automatic"
+          },
+          "requester_id": {
+            "type": "string",
+            "description": "User ID of who requested the ad"
+          },
+          "requester_name": {
+            "type": "string",
+            "description": "Username of who requested the ad"
+          },
+          "requester_display_name": {
+            "type": "string",
+            "description": "Display name of who requested the ad"
+          }
+        }
+      }
+    }
+  ]
+}

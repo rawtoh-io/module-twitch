@@ -1,0 +1,157 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io/rawtoh-io
+  IMAGE_PREFIX: module-twitch
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.plan.outputs.images }}
+      sha7: ${{ steps.plan.outputs.sha7 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: plan
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          echo "sha7=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
+
+          # Rebuild everything when we can't compute a reliable diff
+          # (manual run, first push on a branch, force-push).
+          if [ "${{ github.event_name }}" != "push" ] \
+            || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            changed=ALL
+          else
+            changed=$(git diff --name-only "$BEFORE" HEAD)
+            # A dependency change invalidates every image.
+            if echo "$changed" | grep -qE '^(package\.json|bun\.lock)$'; then
+              changed=ALL
+            fi
+          fi
+
+          matches() {
+            [ "$changed" = ALL ] && return 0
+            echo "$changed" | grep -qE "$1"
+          }
+
+          images=()
+          matches '^(apps/api/|packages/)' && images+=(api)
+          matches '^(apps/web/|packages/)' && images+=(web)
+
+          if [ ${#images[@]} -eq 0 ]; then
+            json='[]'
+          else
+            json=$(printf '%s\n' "${images[@]}" | jq -R . | jq -sc .)
+          fi
+          echo "images=$json" >> "$GITHUB_OUTPUT"
+          echo "Building: $json"
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.plan.outputs.images) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/${{ matrix.image }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:production
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:production-${{ needs.plan.outputs.sha7 }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            git.sha=${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}-production
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}-production
+
+  # Deploy to the rawtoh k3s cluster after a successful build on main. Also
+  # runs when no image changed (build job skipped) so manifest-only changes
+  # (deploy/k8s) are still shipped. Images use the mutable `production` tag
+  # with imagePullPolicy: Always, so restarting a deployment pulls the build
+  # just pushed.
+  # Required secret: KUBE_CONFIG (base64 kubeconfig of the rawtoh cluster).
+  # Required repository variable: DOMAIN (base domain — the module
+  # is served at twitch.<DOMAIN>).
+  deploy:
+    needs: [plan, build]
+    if: >-
+      ${{ always() && needs.plan.result == 'success'
+          && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure cluster access
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply manifests
+        run: |
+          set -euo pipefail
+          command -v envsubst >/dev/null || sudo apt-get install -y gettext-base
+          export DOMAIN='${{ vars.DOMAIN }}'
+          kubectl kustomize deploy/k8s | envsubst '$DOMAIN' | kubectl apply -f -
+
+      # Deployment names are twitch-<image> (twitch-api, twitch-web).
+      - name: Roll out updated images
+        run: |
+          set -euo pipefail
+          for img in $(echo '${{ needs.plan.outputs.images }}' | jq -r '.[]'); do
+            kubectl -n rawtoh rollout restart "deployment/twitch-$img"
+            kubectl -n rawtoh rollout status "deployment/twitch-$img" --timeout=300s
+          done
+
+  # Keep the registry under the Free-plan storage quota. Runs only after a
+  # successful build, so the versions just pushed are the ones kept.
+  cleanup:
+    needs: [plan, build]
+    if: needs.plan.outputs.images != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.plan.outputs.images) }}
+    steps:
+      - uses: actions/delete-package-versions@v5
+        with:
+          owner: rawtoh-io
+          package-name: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}
+          package-type: container
+          min-versions-to-keep: 15

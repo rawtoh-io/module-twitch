@@ -1,0 +1,20 @@
+# Non-sensitive configuration. $DOMAIN is substituted at apply time.
+# Rawtoh platform URLs point at the public hostnames (OIDC issuer must
+# match the `iss` claim) except RAWTOH_WS_URL, which uses in-cluster DNS.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: twitch-config
+  namespace: rawtoh
+data:
+  PUBLIC_DOMAIN: twitch.$DOMAIN
+  APP_URL: https://twitch.$DOMAIN
+  POSTGRES_USER: rawtoh
+  POSTGRES_DB: twitch
+  # Rawtoh platform
+  RAWTOH_ISSUER: https://app.$DOMAIN/api/auth
+  RAWTOH_REDIRECT_URI: https://twitch.$DOMAIN/callback
+  RAWTOH_SCOPES: "openid profile email module:install"
+  RAWTOH_WS_URL: ws://rpc:10006
+  # Twitch OAuth — client id/secret are in twitch-secrets
+  TWITCH_REDIRECT_URI: https://twitch.$DOMAIN/callback/twitch

@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twitch-api
+  namespace: rawtoh
+spec:
+  # Keep 1: the container runs DB migrations at startup
+  # (bun run migrate.ts), which must not race across replicas.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: twitch-api
+  template:
+    metadata:
+      labels:
+        app: twitch-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/rawtoh-io/module-twitch-api:production
+          # Mutable tag: rollouts always pull the latest build.
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 10600
+          env:
+            - name: PORT
+              value: "10600"
+          envFrom:
+            - configMapRef:
+                name: twitch-config
+            - secretRef:
+                name: twitch-secrets
+          # /health only comes up after migrations — give it time.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 10600
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 10600
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 10600
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitch-api
+  namespace: rawtoh
+spec:
+  selector:
+    app: twitch-api
+  ports:
+    - port: 10600
+      targetPort: 10600

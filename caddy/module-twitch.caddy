@@ -1,0 +1,42 @@
+# Module Twitch — Caddy site block (standalone / external-proxy modes).
+# The module is served at twitch.<DOMAIN>.
+#
+# Standalone: imported by this repo's root Caddyfile (see
+# docker-compose.caddy.yml — mounted at /etc/caddy/module-twitch.caddy).
+#
+# Behind your own Caddy: copy this file into a directory imported by your
+# main Caddyfile (e.g. `import /etc/caddy/sites/*.caddy`) and run
+# `caddy reload`. Requires twitch-web and twitch-api reachable on the same
+# Docker network.
+#
+# Note: the twitch-web nginx sets the CSP header (app-specific) — Caddy only
+# adds the generic security headers here.
+
+twitch.{$DOMAIN} {
+	encode zstd gzip
+
+	# Security headers
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# API (Hono): REST
+	handle /api/* {
+		reverse_proxy twitch-api:10600
+	}
+
+	# Rawtoh OIDC callback + Twitch OAuth callback (/callback/twitch)
+	handle /callback* {
+		reverse_proxy twitch-api:10600
+	}
+
+	# SPA (nginx container serving the Vite build)
+	handle {
+		reverse_proxy twitch-web:80
+	}
+}

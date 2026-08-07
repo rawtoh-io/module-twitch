@@ -1,0 +1,50 @@
+# SPA frontend: nginx serving the Vite build (see apps/web/Dockerfile).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twitch-web
+  namespace: rawtoh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: twitch-web
+  template:
+    metadata:
+      labels:
+        app: twitch-web
+    spec:
+      containers:
+        - name: web
+          image: ghcr.io/rawtoh-io/module-twitch-web:production
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitch-web
+  namespace: rawtoh
+spec:
+  selector:
+    app: twitch-web
+  ports:
+    - port: 80
+      targetPort: 80
