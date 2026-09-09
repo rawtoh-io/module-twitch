@@ -1,7 +1,8 @@
+import type { Context } from "hono";
 import { createMiddleware } from "hono/factory";
 import type { SessionEnv } from "@hono/session";
 import type { TokenSet, UserInfo, AuthRequest } from "../auth";
-import { getOIDCConfig, refreshAccessToken, fetchUserInfo } from "../auth";
+import { authMode, fetchUserByCookie, getOIDCConfig, refreshAccessToken, fetchUserInfo } from "../auth";
 
 type SessionData = {
   tokens?: TokenSet;
@@ -23,6 +24,14 @@ export type { SessionData, AuthEnv };
 const TOKEN_REFRESH_MARGIN = 60;
 
 export const requireAuth = createMiddleware<AuthEnv>(async (c, next) => {
+  if (authMode === "cookie") {
+    const cookie = c.req.header("cookie");
+    const user = cookie ? await fetchUserByCookie(cookie) : null;
+    if (!user) return c.json({ error: "Unauthorized" }, 401);
+    c.set("user", user);
+    return next();
+  }
+
   const session = c.get("session");
   const data = await session.get();
   if (!data?.user || !data?.tokens || !data?.sub) {
@@ -69,4 +78,16 @@ export function resolveOrg(role?: "owner") {
     }
     await next();
   });
+}
+
+/** Headers to call the hub as the current user: forwarded cookie or bearer token. */
+export async function hubAuthHeaders(
+  c: Context<AuthEnv>,
+): Promise<Record<string, string> | null> {
+  if (authMode === "cookie") {
+    const cookie = c.req.header("cookie");
+    return cookie ? { cookie } : null;
+  }
+  const token = (await c.get("session").get())?.tokens?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : null;
 }

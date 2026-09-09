@@ -12,7 +12,7 @@ Module Rawtoh pour l'integration Twitch. Fournit une interface web (Hono) pour c
 
 ## Fonctionnalites
 
-- Authentification OAuth2 via Rawtoh (login utilisateur)
+- Authentification par SSO cookie Rawtoh (sous-domaine du hub), ou OIDC en auto-hébergé
 - Connexion de comptes Twitch par organisation (OAuth Twitch)
 - Installation self-service : provisionnement automatique d'une instance Rawtoh par compte Twitch (credentials OAuth2 `client_id`/`client_secret`)
 - Connexion WebSocket au hub Rawtoh avec reconnexion automatique (signature Ed25519 d'un nonce)
@@ -25,10 +25,11 @@ Module Rawtoh pour l'integration Twitch. Fournit une interface web (Hono) pour c
 |---|---|---|
 | `SESSION_SECRET` | Secret pour les sessions | requis |
 | `DATABASE_URL` | URL de connexion PostgreSQL | `postgres://rawtoh:rawtoh@localhost:10602/twitch` |
-| `RAWTOH_CLIENT_ID` | Client ID OAuth Rawtoh | requis |
-| `RAWTOH_CLIENT_SECRET` | Client Secret OAuth Rawtoh | requis |
+| `RAWTOH_APP_URL` | URL du hub Rawtoh (page de connexion) | origine de `RAWTOH_ISSUER` |
+| `RAWTOH_CLIENT_ID` | Client ID OAuth Rawtoh — uniquement en auto-hébergé hors du domaine du hub (active OIDC) | — |
+| `RAWTOH_CLIENT_SECRET` | Client Secret OAuth Rawtoh (idem) | — |
 | `RAWTOH_ISSUER` | URL de l'issuer Rawtoh | requis |
-| `RAWTOH_REDIRECT_URI` | URI de callback OAuth Rawtoh | requis |
+| `RAWTOH_REDIRECT_URI` | URI de callback OAuth Rawtoh (mode OIDC) | — |
 | `RAWTOH_SCOPES` | Scopes OAuth Rawtoh | `openid profile email module:install` |
 | `RAWTOH_WS_URL` | URL WebSocket du hub Rawtoh | `ws://127.0.0.1:10006` |
 | `TWITCH_CLIENT_ID` | Client ID de l'app Twitch | requis |

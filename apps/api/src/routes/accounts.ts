@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { requireAuth, resolveOrg } from "../middleware/auth";
+import { hubAuthHeaders, requireAuth, resolveOrg } from "../middleware/auth";
 import type { AuthEnv } from "../middleware/auth";
 import { getRawtohApiUrl } from "../auth";
 import { enroll } from "../rawtoh-auth";
@@ -105,7 +105,8 @@ accounts.get("/api/orgs/:orgId/accounts/events", requireAuth, resolveOrg("owner"
 });
 
 // Self-service install: provisions the module instance in Rawtoh using the
-// user's own OIDC access token (module:install scope) — no copy/paste.
+// user's own hub credentials (forwarded session cookie, or an OIDC token
+// with the module:install scope) — no copy/paste.
 accounts.post("/api/orgs/:orgId/accounts/:accountId/install", requireAuth, resolveOrg("owner"), async (c) => {
   const orgId = c.req.param("orgId");
   const account = await getAccount(c.req.param("accountId"));
@@ -115,14 +116,12 @@ accounts.post("/api/orgs/:orgId/accounts/:accountId/install", requireAuth, resol
     return c.json({ error: "Module already installed" }, 400);
   }
 
-  const data = await c.get("session").get();
-  const accessToken = data?.tokens?.access_token;
-  if (!accessToken) {
-    return c.json({ error: "No Rawtoh access token in session" }, 401);
+  const authHeaders = await hubAuthHeaders(c);
+  if (!authHeaders) {
+    return c.json({ error: "No Rawtoh credentials in session" }, 401);
   }
 
   const apiUrl = getRawtohApiUrl();
-  const authHeaders = { Authorization: `Bearer ${accessToken}` };
 
   // Find the module definition (global catalog)
   const defsRes = await fetch(`${apiUrl}/api/module-definition`, { headers: authHeaders });

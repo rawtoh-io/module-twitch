@@ -36,12 +36,15 @@ function getEnv() {
   // verifiable by the Rawtoh API (self-service instance provisioning).
   const resource = process.env.RAWTOH_RESOURCE || issuer;
 
-  if (!clientId || !clientSecret) {
-    throw new Error("RAWTOH_CLIENT_ID and RAWTOH_CLIENT_SECRET are required");
-  }
-
   return { clientId, clientSecret, issuer, redirectUri, scopes, resource };
 }
+
+/**
+ * How users sign in. `cookie`: this module is served on a subdomain of the
+ * hub's COOKIE_DOMAIN and forwards the hub session cookie to `GET /api/me` —
+ * no OAuth client at all. `oidc`: self-hosted elsewhere, classic OIDC.
+ */
+export const authMode: "cookie" | "oidc" = process.env.RAWTOH_CLIENT_ID ? "oidc" : "cookie";
 
 /** Rawtoh API base URL (derived from the issuer: strip /api/auth) */
 export function getRawtohApiUrl(): string {
@@ -49,10 +52,60 @@ export function getRawtohApiUrl(): string {
   return issuer.replace(/\/api\/auth\/?$/, "");
 }
 
+/** Rawtoh hub SPA (sign-in page). Same origin as the API in production. */
+export function getRawtohAppUrl(): string {
+  return process.env.RAWTOH_APP_URL || getRawtohApiUrl();
+}
+
+const APP_URL = process.env.APP_URL || "http://localhost:10601";
+
+// ponytail: per-cookie cache, 30 s; a hub-side revocation lags by that much.
+const ME_TTL = 30_000;
+const meCache = new Map<string, { user: UserInfo; until: number }>();
+
+/** Cookie SSO: who the forwarded hub session cookie belongs to, or null. */
+export async function fetchUserByCookie(cookie: string): Promise<UserInfo | null> {
+  const hit = meCache.get(cookie);
+  if (hit && hit.until > Date.now()) return hit.user;
+
+  const res = await fetch(`${getRawtohApiUrl()}/api/me`, { headers: { cookie } });
+  if (res.status === 401) return null;
+  if (!res.ok) throw new Error(`Rawtoh /api/me failed (${res.status})`);
+
+  const me = (await res.json()) as {
+    user: { id: string; name: string; email: string; image: string | null };
+    organizations: Array<{ id: string; name: string; slug: string; logo: string | null; role: string }>;
+  };
+  const user: UserInfo = {
+    sub: me.user.id,
+    name: me.user.name,
+    email: me.user.email,
+    picture: me.user.image ?? undefined,
+    organizations: me.organizations.map(({ logo, ...o }) => ({ ...o, logo: logo ?? undefined })),
+  };
+  if (meCache.size > 1000) meCache.clear();
+  meCache.set(cookie, { user, until: Date.now() + ME_TTL });
+  return user;
+}
+
+/** Cookie SSO: end the hub session itself — it is the only session there is. */
+export async function signOutHub(cookie: string): Promise<void> {
+  meCache.delete(cookie);
+  // Better-Auth wants an Origin on cookie-bearing POSTs; the hub trusts ours.
+  const res = await fetch(`${getRawtohApiUrl()}/api/auth/sign-out`, {
+    method: "POST",
+    headers: { cookie, origin: APP_URL },
+  });
+  if (!res.ok && res.status !== 401) throw new Error(`Rawtoh sign-out failed (${res.status})`);
+}
+
 export async function getOIDCConfig(): Promise<oidc.Configuration> {
   if (_config) return _config;
 
   const { clientId, clientSecret, issuer } = getEnv();
+  if (!clientId || !clientSecret) {
+    throw new Error("RAWTOH_CLIENT_ID and RAWTOH_CLIENT_SECRET are required");
+  }
 
   const options = issuer.startsWith("http://")
     ? { execute: [oidc.allowInsecureRequests] }

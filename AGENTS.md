@@ -14,8 +14,8 @@ Multi-tenant Twitch integration module with OAuth dual-login (Rawtoh + Twitch), 
 | Server state | TanStack React Query |
 | Twitch API | Twurple (auth, api, chat, eventsub-ws) |
 | External real-time | WebSocket JSON-RPC 2.0 |
-| Auth | OIDC (openid-client) + Hono sessions (server-side storage in `session` table — stateless cookies exceed the 4 KB browser limit) |
-| Self-service install | User OIDC token (scope `module:install`) → module provisions one Rawtoh instance per Twitch account (`POST /api/orgs/:orgId/accounts/:accountId/install`) |
+| Auth | Cookie SSO by default (hub session cookie forwarded to `GET /api/me`, no OAuth client); OIDC (openid-client) when `RAWTOH_CLIENT_ID` is set. Hono sessions (server-side storage in `session` table) carry OIDC tokens / OAuth state |
+| Self-service install | User hub credentials (forwarded cookie, or OIDC token with scope `module:install`) → module provisions one Rawtoh instance per Twitch account (`POST /api/orgs/:orgId/accounts/:accountId/install`) |
 | Module ↔ hub auth | Ed25519 key pair per Twitch account, generated locally at enrollment; `session.challenge` nonce signed and returned in `session.register` |
 | Monorepo | Turbo + Bun workspaces |
 | Linter / Formatter | Biome |
@@ -34,7 +34,7 @@ module-twitch/
 │   │       ├── rpc.ts           # JSON-RPC 2.0 method registration
 │   │       ├── ws.ts            # WsClient (JSON-RPC 2.0, reconnect, ping)
 │   │       ├── connections.ts   # Account connection management + reconnect
-│   │       ├── auth.ts          # OIDC utilities (discovery, PKCE, tokens, RFC 8707 resource)
+│   │       ├── auth.ts          # Cookie SSO (/api/me, sign-out relay) + OIDC utilities (PKCE, RFC 8707)
 │   │       ├── rawtoh-auth.ts   # Enrollment (one-shot token → key pair) + challenge signing
 │   │       ├── session-storage.ts # @hono/session PostgreSQL storage (cookie carries sid only)
 │   │       ├── db/
@@ -197,9 +197,9 @@ export function useAccounts() {
 
 ### Auth flow
 
-1. **User login**: Rawtoh OIDC (PKCE + RFC 8707 `resource`, scope `module:install`) → session cookie (sid only, data in `session` table)
+1. **User login**: cookie SSO — the hub session cookie (`COOKIE_DOMAIN`) is forwarded to `GET /api/me` on every request (30 s cache); or Rawtoh OIDC (PKCE + RFC 8707 `resource`, scope `module:install`) when `RAWTOH_CLIENT_ID` is set → session cookie (sid only, data in `session` table)
 2. **Twitch connect**: Twitch OAuth → tokens stored in `account` table
-3. **Self-service install**: `POST /api/orgs/:orgId/accounts/:accountId/install` uses the user's OIDC access token to provision one Rawtoh module instance per Twitch account (name = twitch login) → the returned enrollment token is redeemed immediately, storing `instanceId`/`privateKey`/`rpcUrl` on the account row
+3. **Self-service install**: `POST /api/orgs/:orgId/accounts/:accountId/install` uses the user's hub credentials (cookie or OIDC token) to provision one Rawtoh module instance per Twitch account (name = twitch login) → the returned enrollment token is redeemed immediately, storing `instanceId`/`privateKey`/`rpcUrl` on the account row
 4. **WebSocket register**: sign the hub's `session.challenge` nonce with the account's private key → `session.register` on Rawtoh hub → RPC methods available
 
 ## Commands
@@ -229,7 +229,7 @@ docker compose -f docker-compose.dev.yml up -d
 
 Environment variables in `.env` at the root:
 
-- `RAWTOH_CLIENT_ID`, `RAWTOH_CLIENT_SECRET`, `RAWTOH_ISSUER` — Rawtoh OIDC
+- `RAWTOH_ISSUER`, `RAWTOH_APP_URL` — Rawtoh hub; `RAWTOH_CLIENT_ID`, `RAWTOH_CLIENT_SECRET` only for OIDC
 - `RAWTOH_SCOPES` — must include `module:install` for self-service install (`openid profile email module:install`)
 - `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` — Twitch app credentials
 - `DATABASE_URL` — PostgreSQL connection string
@@ -260,4 +260,4 @@ docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d
 docker compose -f docker-compose.yml -f docker-compose.proxy.yml up -d
 ```
 
-Required `.env` (compose production): `PUBLIC_DOMAIN`, `POSTGRES_PASSWORD`, `SESSION_SECRET`, `RAWTOH_CLIENT_ID`, `RAWTOH_CLIENT_SECRET`, `RAWTOH_ISSUER`, `RAWTOH_WS_URL`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` (+ `ACME_EMAIL` standalone, `PROXY_NETWORK` external-proxy).
+Required `.env` (compose production): `PUBLIC_DOMAIN`, `POSTGRES_PASSWORD`, `SESSION_SECRET`, `RAWTOH_ISSUER` (+ `RAWTOH_CLIENT_ID`/`RAWTOH_CLIENT_SECRET` for OIDC off the hub domain), `RAWTOH_WS_URL`, `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` (+ `ACME_EMAIL` standalone, `PROXY_NETWORK` external-proxy).
