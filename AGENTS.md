@@ -14,7 +14,7 @@ Multi-tenant Twitch integration module with OAuth dual-login (Rawtoh + Twitch), 
 | Server state | TanStack React Query |
 | Twitch API | Twurple (auth, api, chat, eventsub-ws) |
 | External real-time | WebSocket JSON-RPC 2.0 |
-| Auth | Cookie SSO by default (hub session cookie forwarded to `GET /api/me`, no OAuth client); OIDC (openid-client) when `RAWTOH_CLIENT_ID` is set. Hono sessions (server-side storage in `session` table) carry OIDC tokens / OAuth state |
+| Auth | `@rawtoh/module-sdk` (`/hono`): cookie SSO by default (hub session cookie forwarded to `GET /api/me`, no OAuth client); OIDC (openid-client) when `RAWTOH_CLIENT_ID` is set. Hono sessions (server-side storage in `session` table) carry OIDC tokens / OAuth state |
 | Self-service install | User hub credentials (forwarded cookie, or OIDC token with scope `module:install`) → module provisions one Rawtoh instance per Twitch account (`POST /api/orgs/:orgId/accounts/:accountId/install`) |
 | Module ↔ hub auth | Ed25519 key pair per Twitch account, generated locally at enrollment; `session.challenge` nonce signed and returned in `session.register` |
 | Monorepo | Turbo + Bun workspaces |
@@ -32,17 +32,14 @@ module-twitch/
 │   │       ├── api.ts           # TwitchApi class (Twurple API wrapper)
 │   │       ├── twitch.ts        # TwitchClient (chat + EventSub management)
 │   │       ├── rpc.ts           # JSON-RPC 2.0 method registration
-│   │       ├── ws.ts            # WsClient (JSON-RPC 2.0, reconnect, ping)
 │   │       ├── connections.ts   # Account connection management + reconnect
-│   │       ├── auth.ts          # Cookie SSO (/api/me, sign-out relay) + OIDC utilities (PKCE, RFC 8707)
-│   │       ├── rawtoh-auth.ts   # Enrollment (one-shot token → key pair) + challenge signing
 │   │       ├── session-storage.ts # @hono/session PostgreSQL storage (cookie carries sid only)
 │   │       ├── db/
 │   │       │   └── index.ts     # CRUD query functions
 │   │       ├── middleware/
-│   │       │   └── auth.ts      # requireAuth, resolveOrg
+│   │       │   └── auth.ts      # SessionData/AuthEnv + requireAuth/resolveOrg bound from @rawtoh/module-sdk
 │   │       ├── routes/
-│   │       │   ├── auth.ts      # Login, callback (Rawtoh + Twitch), logout, /api/auth/me
+│   │       │   ├── auth.ts      # authRoutes() from the SDK + Twitch OAuth connect/callback
 │   │       │   └── accounts.ts  # Twitch account CRUD, self-service install, credentials, connection
 │   │       └── templates/       # HTML templates (legacy SSR)
 │   │

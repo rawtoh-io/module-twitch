@@ -12,8 +12,8 @@ export const db = drizzle(client, { schema });
 
 export type { Account, AccountInsert };
 
-export type { RawtohIdentity } from "../rawtoh-auth";
-import type { RawtohIdentity } from "../rawtoh-auth";
+export type { RawtohIdentity } from "@rawtoh/module-sdk";
+import type { RawtohIdentity } from "@rawtoh/module-sdk";
 import { decryptPrivateKey, encryptPrivateKey } from "../identity-crypto";
 
 // ── Twitch Accounts ──

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { JSONRPCErrorException } from "json-rpc-2.0";
-import type { WsClient } from "./ws";
+import type { WsClient } from "@rawtoh/module-sdk";
 import type { TwitchClient } from "./twitch";
 
 // ── Known events ─────────────────────────────────────────────────────

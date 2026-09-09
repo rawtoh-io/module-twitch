@@ -1,8 +1,8 @@
 import { EventEmitter } from "events";
-import { WsClient } from "./ws";
+import { WsClient } from "@rawtoh/module-sdk";
 import { TwitchClient } from "./twitch";
 import { registerMethods } from "./rpc";
-import { signChallenge, type RawtohIdentity } from "./rawtoh-auth";
+import { signChallenge, type RawtohIdentity } from "@rawtoh/module-sdk";
 import { listAllAccounts, type Account } from "./db";
 
 // The hub this module is deployed against. A module talks to exactly one, so

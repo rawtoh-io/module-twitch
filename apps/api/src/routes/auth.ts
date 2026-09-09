@@ -1,16 +1,8 @@
 import { Hono } from "hono";
 import { exchangeCode as exchangeTwitchCode } from "@twurple/auth";
-import {
-  authMode,
-  getOIDCConfig,
-  buildAuthorizeUrl,
-  exchangeCode,
-  fetchUserInfo,
-  fetchUserByCookie,
-  getRawtohAppUrl,
-  signOutHub,
-} from "../auth";
-import type { AuthEnv } from "../middleware/auth";
+import { authRoutes } from "@rawtoh/module-sdk/hono";
+import { requireAuth, resolveOrg } from "../middleware/auth";
+import type { AuthEnv, SessionData } from "../middleware/auth";
 
 const APP_URL = process.env.APP_URL || "http://localhost:10601";
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID || "";
@@ -41,101 +33,20 @@ const TWITCH_SCOPES = (process.env.TWITCH_SCOPES || [
 
 const auth = new Hono<AuthEnv>();
 
-auth.get("/api/auth/login", async (c) => {
-  if (authMode === "cookie") {
-    return c.json({ url: `${getRawtohAppUrl()}/signin?redirect=${encodeURIComponent(APP_URL)}` });
-  }
-
-  const session = c.get("session");
-  const config = await getOIDCConfig();
-  const { url, auth: authRequest } = await buildAuthorizeUrl(config);
-  await session.update((prev) => ({ ...prev!, auth: authRequest }));
-  return c.json({ url: url.toString() });
-});
-
-auth.get("/callback", async (c) => {
-  const session = c.get("session");
-  const error = c.req.query("error");
-
-  if (error) {
-    return c.redirect(`${APP_URL}?error=${encodeURIComponent(error)}`);
-  }
-
-  const code = c.req.query("code");
-  const state = c.req.query("state");
-
-  if (!code || !state) {
-    return c.redirect(`${APP_URL}?error=missing_params`);
-  }
-
-  const data = await session.get();
-  const savedAuth = data?.auth;
-
-  if (!savedAuth) {
-    return c.redirect(`${APP_URL}?error=invalid_state`);
-  }
-
-  try {
-    const config = await getOIDCConfig();
-    const redirectUri = process.env.RAWTOH_REDIRECT_URI || "http://localhost:10600/callback";
-    const callbackUrl = new URL(redirectUri);
-    callbackUrl.search = new URL(c.req.url).search;
-    const { tokens, sub } = await exchangeCode(config, callbackUrl, {
-      expectedState: savedAuth.state,
-      expectedNonce: savedAuth.nonce,
-      pkceCodeVerifier: savedAuth.codeVerifier,
-    });
-
-    const user = await fetchUserInfo(config, tokens.access_token, sub);
-    const token_expires_at = Math.floor(Date.now() / 1000) + (tokens.expires_in ?? 3600);
-    await session.update({ tokens, user, sub, token_expires_at });
-    return c.redirect(APP_URL);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error("[auth] Token exchange error:", msg);
-    return c.redirect(`${APP_URL}?error=token_exchange`);
-  }
-});
-
-auth.get("/api/auth/me", async (c) => {
-  if (authMode === "cookie") {
-    const cookie = c.req.header("cookie");
-    const user = cookie ? await fetchUserByCookie(cookie).catch(() => null) : null;
-    return c.json({ user });
-  }
-
-  const session = c.get("session");
-  const data = await session.get();
-  if (!data?.user) {
-    return c.json({ user: null });
-  }
-  return c.json({ user: data.user });
-});
-
-auth.post("/api/auth/logout", async (c) => {
-  const cookie = c.req.header("cookie");
-  if (authMode === "cookie" && cookie) await signOutHub(cookie);
-  c.get("session").delete();
-  return c.json({ ok: true });
-});
+auth.route("/", authRoutes<SessionData>(APP_URL));
 
 // ── Twitch OAuth ──
 
-auth.get("/api/orgs/:orgId/twitch/connect", async (c) => {
+auth.get("/api/orgs/:orgId/twitch/connect", requireAuth, resolveOrg("owner"), async (c) => {
   const session = c.get("session");
-  const data = await session.get();
-  if (!data?.user) return c.json({ error: "Unauthorized" }, 401);
-
   const orgId = c.req.param("orgId");
-  const org = data.user.organizations?.find((o) => o.id === orgId);
-  if (!org || org.role !== "owner") return c.json({ error: "Access denied" }, 403);
 
   if (!TWITCH_CLIENT_ID) {
     return c.json({ error: "TWITCH_CLIENT_ID is not configured" }, 500);
   }
 
   const twitchState = crypto.randomUUID();
-  await session.update((prev) => ({ ...prev, twitch_oauth: { state: twitchState, orgId: org.id } }));
+  await session.update((prev) => ({ ...prev, twitch_oauth: { state: twitchState, orgId } }));
 
   const params = new URLSearchParams({
     client_id: TWITCH_CLIENT_ID,
@@ -149,10 +60,9 @@ auth.get("/api/orgs/:orgId/twitch/connect", async (c) => {
   return c.json({ url: `https://id.twitch.tv/oauth2/authorize?${params.toString()}` });
 });
 
-auth.get("/callback/twitch", async (c) => {
+auth.get("/callback/twitch", requireAuth, async (c) => {
   const session = c.get("session");
   const data = await session.get();
-  if (!data?.user) return c.redirect(APP_URL);
 
   const code = c.req.query("code");
   const state = c.req.query("state");
@@ -166,7 +76,7 @@ auth.get("/callback/twitch", async (c) => {
     return c.redirect(`${APP_URL}?error=missing_params`);
   }
 
-  const twitchOauth = data.twitch_oauth;
+  const twitchOauth = data?.twitch_oauth;
   if (!twitchOauth || twitchOauth.state !== state) {
     return c.redirect(`${APP_URL}?error=invalid_state`);
   }

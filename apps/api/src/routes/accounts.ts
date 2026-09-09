@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { hubAuthHeaders, requireAuth, resolveOrg } from "../middleware/auth";
 import type { AuthEnv } from "../middleware/auth";
-import { getRawtohApiUrl } from "../auth";
-import { enroll } from "../rawtoh-auth";
+import { getRawtohApiUrl } from "@rawtoh/module-sdk";
+import { enroll } from "@rawtoh/module-sdk";
 import {
   listAccounts,
   getAccount,
