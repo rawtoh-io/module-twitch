@@ -44,6 +44,16 @@ export class TwitchClient extends TwitchApi {
     this.chat = new ChatClient({ authProvider, channels: [account.twitchLogin], requestMembershipEvents: true });
     this.eventSubListener = new EventSubWsListener({ apiClient: this.api });
 
+    // Twurple creates subscriptions asynchronously, so subscribeEventSub()
+    // returns before Twitch has accepted or refused. Without this handler a
+    // refusal (a missing scope, most often) is invisible: the trigger shows up
+    // in the hub and never fires.
+    this.eventSubListener.onSubscriptionCreateFailure((sub, error) => {
+      console.error(
+        `[twitch] EventSub subscription failed (${sub.id}): ${error.message}`
+      );
+    });
+
     this.registerChatEvents();
   }
 
