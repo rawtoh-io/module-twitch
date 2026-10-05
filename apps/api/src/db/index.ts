@@ -57,13 +57,15 @@ export async function updateAccountTokens(
   accessToken: string,
   refreshToken: string | null,
   expiresIn: number | null,
-  obtainmentTimestamp: number
+  obtainmentTimestamp: number,
+  scopes?: string
 ): Promise<void> {
   await db.update(account).set({
     accessToken,
     refreshToken,
     expiresIn,
     obtainmentTimestamp,
+    scopes,
   }).where(eq(account.id, accountId));
 }
 

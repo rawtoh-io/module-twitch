@@ -3,6 +3,8 @@ import { exchangeCode as exchangeTwitchCode } from "@twurple/auth";
 import { authRoutes } from "@rawtoh/module-sdk/hono";
 import { requireAuth, resolveOrg } from "../middleware/auth";
 import type { AuthEnv, SessionData } from "../middleware/auth";
+import { reconnectAccount } from "../connections";
+import { getAccountByUserId, createAccount, updateAccountTokens, getAccount } from "../db";
 
 const APP_URL = process.env.APP_URL || "http://localhost:10601";
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID || "";
@@ -106,10 +108,24 @@ auth.get("/callback/twitch", requireAuth, async (c) => {
       throw new Error("No user data returned from Twitch");
     }
 
-    const { getAccountByUserId, createAccount } = await import("../db");
-
     const existing = await getAccountByUserId(orgId, twitchUser.id);
-    if (!existing) {
+    if (existing) {
+      // Re-consent is the only way to grant scopes added after the first connect.
+      await updateAccountTokens(
+        existing.id,
+        tokenData.accessToken,
+        tokenData.refreshToken,
+        tokenData.expiresIn,
+        tokenData.obtainmentTimestamp,
+        tokenData.scope.join(" "),
+      );
+      const updated = await getAccount(existing.id);
+      if (updated?.instanceId && updated.privateKey) {
+        reconnectAccount(updated).catch((err) => {
+          console.error(`[twitch-oauth] Reconnect failed: ${err instanceof Error ? err.message : err}`);
+        });
+      }
+    } else {
       await createAccount({
         id: crypto.randomUUID(),
         orgId,
