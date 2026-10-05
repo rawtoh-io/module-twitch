@@ -100,14 +100,14 @@ export function registerMethods(client: WsClient, twitch: TwitchClient, subscrip
   });
 
   // ── Chat ──
-  client.rpc.addMethod("chat.say", async ({ message, reply_to }: { message?: string; reply_to?: string }) => {
+  client.rpc.addMethod("chat.say", async ({ message, reply_to, channel }: { message?: string; reply_to?: string; channel?: string }) => {
     if (!message) throw new JSONRPCErrorException("Missing required param: message", -32602);
-    return rpcWrap(() => twitch.say(message, reply_to).then(() => ({ ok: true })), "Failed to send message");
+    return rpcWrap(() => twitch.say(message, reply_to, channel).then(() => ({ ok: true })), "Failed to send message");
   });
 
-  client.rpc.addMethod("chat.action", async ({ message }: { message?: string }) => {
+  client.rpc.addMethod("chat.action", async ({ message, channel }: { message?: string; channel?: string }) => {
     if (!message) throw new JSONRPCErrorException("Missing required param: message", -32602);
-    return rpcWrap(() => twitch.action(message).then(() => ({ ok: true })), "Failed to send action");
+    return rpcWrap(() => twitch.action(message, channel).then(() => ({ ok: true })), "Failed to send action");
   });
 
   // ── Channel ──

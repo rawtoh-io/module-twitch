@@ -329,12 +329,12 @@ export class TwitchClient extends TwitchApi {
 
   // ── Chat methods ───────────────────────────────────────────────────
 
-  async say(message: string, replyTo?: string): Promise<void> {
-    await this.chat.say(this.channel, message, replyTo ? { replyTo } : undefined);
+  async say(message: string, replyTo?: string, channel: string = this.channel): Promise<void> {
+    await this.chat.say(channel, message, replyTo ? { replyTo } : undefined);
   }
 
-  async action(message: string): Promise<void> {
-    await this.chat.action(this.channel, message);
+  async action(message: string, channel: string = this.channel): Promise<void> {
+    await this.chat.action(channel, message);
   }
 
   // ── EventSub dynamic subscription ──────────────────────────────────

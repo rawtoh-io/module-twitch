@@ -23,6 +23,13 @@
           "schema": {
             "type": "string"
           }
+        },
+        {
+          "name": "channel",
+          "summary": "Channel login to send to (defaults to the account's own channel)",
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "result": {
@@ -46,6 +53,13 @@
           "name": "message",
           "summary": "Action message text",
           "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "channel",
+          "summary": "Channel login to send to (defaults to the account's own channel)",
           "schema": {
             "type": "string"
           }
