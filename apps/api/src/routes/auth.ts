@@ -28,6 +28,7 @@ const TWITCH_SCOPES = (process.env.TWITCH_SCOPES || [
   "channel:manage:vips",
   "bits:read",
   "clips:edit",
+  "whispers:read",
   "whispers:edit",
   "user:read:email",
 ].join(" ")).split(" ");
