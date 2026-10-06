@@ -13,7 +13,8 @@ import {
 import { reconnectAccount, disconnectAccount, isAccountConnected, getAccountWsClient, getDisconnectReason, connectionEvents } from "../connections";
 import { setCredentialsBody } from "@module-twitch/shared/validation";
 
-const MODULE_SLUG = "twitch";
+// Override to install a second copy (e.g. a local dev build) under another slug
+const MODULE_SLUG = process.env.RAWTOH_MODULE_SLUG || "twitch";
 
 /**
  * The Rawtoh access token lives an hour and this module deliberately requests
@@ -123,26 +124,18 @@ accounts.post("/api/orgs/:orgId/accounts/:accountId/install", requireAuth, resol
 
   const apiUrl = getRawtohApiUrl();
 
-  // Find the module definition (global catalog)
-  const defsRes = await fetch(`${apiUrl}/api/module-definition`, { headers: authHeaders });
-  if (!defsRes.ok) {
-    if (defsRes.status === 401) return c.json(RAWTOH_SESSION_EXPIRED, 401);
-    return c.json({ error: `Failed to reach Rawtoh (${defsRes.status})` }, 502);
-  }
-  const defs = (await defsRes.json()) as Array<{ id: string; slug: string }>;
-  const def = defs.find((d) => d.slug === MODULE_SLUG);
-  if (!def) {
-    return c.json({ error: `Module "${MODULE_SLUG}" not found in Rawtoh catalog` }, 502);
-  }
-
-  // Provision the instance (user needs module:install scope + owner role)
+  // Provision the instance (user needs module:install scope + owner role).
+  // Rawtoh resolves the slug: the org's own definition first, then the global catalog.
   const installRes = await fetch(`${apiUrl}/api/o/${orgId}/module-instance`, {
     method: "POST",
     headers: { ...authHeaders, "Content-Type": "application/json" },
-    body: JSON.stringify({ idModule: def.id, name: account.twitchLogin }),
+    body: JSON.stringify({ slug: MODULE_SLUG, name: account.twitchLogin }),
   });
   if (!installRes.ok) {
     if (installRes.status === 401) return c.json(RAWTOH_SESSION_EXPIRED, 401);
+    if (installRes.status === 404) {
+      return c.json({ error: `Module "${MODULE_SLUG}" not found in Rawtoh catalog` }, 502);
+    }
     const body = (await installRes.json().catch(() => ({}))) as { error?: string };
     return c.json({ error: body.error || `Install failed (${installRes.status})` }, 502);
   }

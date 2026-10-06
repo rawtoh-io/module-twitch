@@ -232,6 +232,7 @@ Environment variables in `.env` at the root:
 - `DATABASE_URL` — PostgreSQL connection string
 - `SESSION_SECRET` — Session encryption (64+ chars)
 - `RAWTOH_WS_URL` — WebSocket hub URL
+- `RAWTOH_MODULE_SLUG` — optional, module definition slug (default `twitch`); set it to install a local copy under another slug
 
 ## Deployment
 

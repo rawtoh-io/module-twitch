@@ -32,6 +32,7 @@ Module Rawtoh pour l'integration Twitch. Fournit une interface web (Hono) pour c
 | `RAWTOH_REDIRECT_URI` | URI de callback OAuth Rawtoh (mode OIDC) | — |
 | `RAWTOH_SCOPES` | Scopes OAuth Rawtoh | `openid profile email module:install` |
 | `RAWTOH_WS_URL` | URL WebSocket du hub Rawtoh | `ws://127.0.0.1:10006` |
+| `RAWTOH_MODULE_SLUG` | Slug de la definition de module dans Rawtoh (tester une copie locale sous un autre slug) | `twitch` |
 | `TWITCH_CLIENT_ID` | Client ID de l'app Twitch | requis |
 | `TWITCH_CLIENT_SECRET` | Client Secret de l'app Twitch | requis |
 | `TWITCH_REDIRECT_URI` | URI de callback OAuth Twitch | `http://localhost:10600/callback/twitch` |
