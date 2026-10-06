@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { hubAuthHeaders, requireAuth, resolveOrg } from "../middleware/auth";
 import type { AuthEnv } from "../middleware/auth";
 import { getRawtohApiUrl } from "@rawtoh/module-sdk";
-import { enroll } from "@rawtoh/module-sdk";
+import { enroll, InstallError, installInstance } from "@rawtoh/module-sdk";
 import {
   listAccounts,
   getAccount,
@@ -15,18 +15,6 @@ import { setCredentialsBody } from "@module-twitch/shared/validation";
 
 // Override to install a second copy (e.g. a local dev build) under another slug
 const MODULE_SLUG = process.env.RAWTOH_MODULE_SLUG || "twitch";
-
-/**
- * The Rawtoh access token lives an hour and this module deliberately requests
- * no `offline_access`, so it cannot be renewed: a 401 from Rawtoh means the
- * stored token aged out — or was revoked — while this module's own session
- * stayed valid. Relaying that as a 502 reads as "Rawtoh is down" and hides the
- * one thing the user can act on.
- */
-const RAWTOH_SESSION_EXPIRED = {
-  error:
-    "Rawtoh session expired — sign out of this module and back in, then retry",
-} as const;
 
 const CONNECT_TIMEOUT_MS = 10_000;
 
@@ -122,31 +110,13 @@ accounts.post("/api/orgs/:orgId/accounts/:accountId/install", requireAuth, resol
     return c.json({ error: "No Rawtoh credentials in session" }, 401);
   }
 
-  const apiUrl = getRawtohApiUrl();
-
-  // Provision the instance (user needs module:install scope + owner role).
   // Rawtoh resolves the slug: the org's own definition first, then the global catalog.
-  const installRes = await fetch(`${apiUrl}/api/o/${orgId}/module-instance`, {
-    method: "POST",
-    headers: { ...authHeaders, "Content-Type": "application/json" },
-    body: JSON.stringify({ slug: MODULE_SLUG, name: account.twitchLogin }),
-  });
-  if (!installRes.ok) {
-    if (installRes.status === 401) return c.json(RAWTOH_SESSION_EXPIRED, 401);
-    if (installRes.status === 404) {
-      return c.json({ error: `Module "${MODULE_SLUG}" not found in Rawtoh catalog` }, 502);
-    }
-    const body = (await installRes.json().catch(() => ({}))) as { error?: string };
-    return c.json({ error: body.error || `Install failed (${installRes.status})` }, 502);
-  }
-  const instance = (await installRes.json()) as { enrollmentToken: string };
-
-  // Same enrollment path as a hand-pasted token — the user just never sees it.
   let identity;
   try {
-    identity = await enroll(apiUrl, instance.enrollmentToken);
+    identity = await installInstance(getRawtohApiUrl(), authHeaders, orgId, { slug: MODULE_SLUG, name: account.twitchLogin });
   } catch (err) {
-    return c.json({ error: err instanceof Error ? err.message : "Enrollment failed" }, 502);
+    const status = err instanceof InstallError && err.code === "session_expired" ? 401 : 502;
+    return c.json({ error: err instanceof Error ? err.message : "Install failed" }, status);
   }
   await setAccountIdentity(account.id, identity);
 
