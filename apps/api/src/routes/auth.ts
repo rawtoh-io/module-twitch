@@ -17,6 +17,8 @@ const TWITCH_SCOPES = (process.env.TWITCH_SCOPES || [
   "channel:manage:polls",
   "channel:manage:predictions",
   "channel:manage:raids",
+  "channel:read:redemptions",
+  "channel:manage:redemptions",
   "channel:edit:commercial",
   "moderator:manage:banned_users",
   "moderator:read:chatters",
