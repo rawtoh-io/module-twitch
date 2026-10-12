@@ -112,3 +112,12 @@ export function useConnectTwitch(orgId: string) {
     },
   })
 }
+
+export function useReauthorizeTwitch(orgId: string) {
+  return useMutation({
+    mutationFn: async (accountId: string) => {
+      const res = await query.post(`api/orgs/${orgId}/accounts/${accountId}/twitch/reauthorize`).json<{ url: string }>()
+      window.location.href = res.url
+    },
+  })
+}

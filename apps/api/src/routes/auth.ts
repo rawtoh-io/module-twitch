@@ -3,8 +3,10 @@ import { exchangeCode as exchangeTwitchCode } from "@twurple/auth";
 import { authRoutes } from "@rawtoh/module-sdk/hono";
 import { requireAuth, resolveOrg } from "../middleware/auth";
 import type { AuthEnv, SessionData } from "../middleware/auth";
-import { reconnectAccount } from "../connections";
+import { reconnectAccount, disconnectAccount } from "../connections";
 import { getAccountByUserId, createAccount, updateAccountTokens, getAccount } from "../db";
+import { buildAuthorizeUrl } from "../twitch-oauth/build-authorize-url";
+import { revokeTwitchToken } from "../twitch-oauth/revoke-token";
 
 const APP_URL = process.env.APP_URL || "http://localhost:10601";
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID || "";
@@ -54,16 +56,30 @@ auth.get("/api/orgs/:orgId/twitch/connect", requireAuth, resolveOrg("owner"), as
   const twitchState = crypto.randomUUID();
   await session.update((prev) => ({ ...prev, twitch_oauth: { state: twitchState, orgId } }));
 
-  const params = new URLSearchParams({
-    client_id: TWITCH_CLIENT_ID,
-    redirect_uri: TWITCH_REDIRECT_URI,
-    response_type: "code",
-    scope: TWITCH_SCOPES.join(" "),
-    state: twitchState,
-    force_verify: "true",
-  });
+  return c.json({ url: buildAuthorizeUrl({ clientId: TWITCH_CLIENT_ID, redirectUri: TWITCH_REDIRECT_URI, scopes: TWITCH_SCOPES, state: twitchState }) });
+});
 
-  return c.json({ url: `https://id.twitch.tv/oauth2/authorize?${params.toString()}` });
+// Drop the current Twitch token and start a fresh OAuth flow for an existing account.
+// The callback updates the stored tokens and reconnects the account.
+auth.post("/api/orgs/:orgId/accounts/:accountId/twitch/reauthorize", requireAuth, resolveOrg("owner"), async (c) => {
+  const session = c.get("session");
+  const orgId = c.req.param("orgId");
+
+  if (!TWITCH_CLIENT_ID) {
+    return c.json({ error: "TWITCH_CLIENT_ID is not configured" }, 500);
+  }
+
+  const account = await getAccount(c.req.param("accountId"));
+  if (!account || account.orgId !== orgId) return c.json({ error: "Account not found" }, 404);
+
+  disconnectAccount(account.id);
+  const revoked = await revokeTwitchToken(TWITCH_CLIENT_ID, account.accessToken);
+  if (!revoked) console.warn(`[twitch-oauth] Revoke failed for ${account.twitchLogin}, continuing with re-consent`);
+
+  const twitchState = crypto.randomUUID();
+  await session.update((prev) => ({ ...prev, twitch_oauth: { state: twitchState, orgId } }));
+
+  return c.json({ url: buildAuthorizeUrl({ clientId: TWITCH_CLIENT_ID, redirectUri: TWITCH_REDIRECT_URI, scopes: TWITCH_SCOPES, state: twitchState }) });
 });
 
 auth.get("/callback/twitch", requireAuth, async (c) => {

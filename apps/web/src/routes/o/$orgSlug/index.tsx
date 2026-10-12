@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useOrg } from '@/hooks/use-auth'
-import { useAccounts, useInstallAccount, useSetCredentials, useDeleteCredentials, useRemoveAccount, useConnectTwitch, useConnectionStatus, useAccountConnection, useDisconnectAccount, useReconnectAccount, usePingAccount } from '@/hooks/use-accounts'
+import { useAccounts, useInstallAccount, useSetCredentials, useDeleteCredentials, useRemoveAccount, useConnectTwitch, useConnectionStatus, useAccountConnection, useDisconnectAccount, useReconnectAccount, usePingAccount, useReauthorizeTwitch } from '@/hooks/use-accounts'
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeftIcon, PlusIcon, TrashIcon, KeyIcon, UnplugIcon, PlugIcon, RefreshCwIcon, ActivityIcon, TvIcon, TriangleAlertIcon } from 'lucide-react'
+import { ArrowLeftIcon, PlusIcon, TrashIcon, KeyIcon, UnplugIcon, PlugIcon, RefreshCwIcon, ActivityIcon, TvIcon, TriangleAlertIcon, KeyRoundIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { Account } from '@module-twitch/shared/validation'
@@ -103,6 +103,7 @@ function AccountCard({
   const installAccount = useInstallAccount(orgId)
   const setCredentials = useSetCredentials(orgId)
   const deleteCredentials = useDeleteCredentials(orgId)
+  const reauthorizeTwitch = useReauthorizeTwitch(orgId)
   const [enrollmentToken, setEnrollmentToken] = useState('')
 
   return (
@@ -158,6 +159,20 @@ function AccountCard({
               <Button variant="ghost" size="sm" onClick={() => setDrawerOpen(true)}>
                 <KeyIcon className="h-4 w-4" />
                 Credentials
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={reauthorizeTwitch.isPending}
+                title="Revoke the Twitch token and request a new one with the current scopes"
+                onClick={() =>
+                  reauthorizeTwitch.mutate(account.id, {
+                    onError: (err) => toast.error(err.message),
+                  })
+                }
+              >
+                <KeyRoundIcon className="h-4 w-4" />
+                {reauthorizeTwitch.isPending ? 'Redirecting…' : 'Reauthorize Twitch'}
               </Button>
               {account.hasCredentials && (
                 <>
