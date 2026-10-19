@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
 import { useAuth } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -12,6 +12,11 @@ export const Route = createFileRoute('/')({
 function RouteComponent() {
   const { user, logout } = useAuth()
   const orgs = user?.organizations ?? []
+
+  // Land straight in the admin shell; it has an org switcher. The list below
+  // only remains for users without any organization.
+  const home = orgs.find((o) => o.role === 'owner') ?? orgs[0]
+  if (home) return <Navigate to="/o/$orgSlug" params={{ orgSlug: home.slug }} replace />
 
   return (
     <div className="max-w-4xl mx-auto px-8 py-8">
