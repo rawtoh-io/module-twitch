@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useOrg } from '@/hooks/use-auth'
 import { useAccounts, useInstallAccount, useSetCredentials, useDeleteCredentials, useRemoveAccount, useConnectTwitch, useConnectionStatus, useAccountConnection, useDisconnectAccount, useReconnectAccount, usePingAccount, useReauthorizeTwitch } from '@/hooks/use-accounts'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AccessDenied } from '@/components/access-denied'
-import { ArrowLeftIcon, PlusIcon, TrashIcon, KeyIcon, UnplugIcon, PlugIcon, RefreshCwIcon, ActivityIcon, TvIcon, TriangleAlertIcon, KeyRoundIcon, SettingsIcon } from 'lucide-react'
+import { PlusIcon, TrashIcon, KeyIcon, UnplugIcon, PlugIcon, RefreshCwIcon, ActivityIcon, TvIcon, TriangleAlertIcon, KeyRoundIcon, SettingsIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { Account } from '@module-twitch/shared/validation'
@@ -28,18 +28,7 @@ function RouteComponent() {
   const reconnectAccount = useReconnectAccount(org.id)
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-8 py-6 sm:py-8">
-      <div className="flex items-center gap-3 sm:gap-4 mb-6">
-        <Link to="/">
-          <Button variant="ghost" size="icon">
-            <ArrowLeftIcon />
-          </Button>
-        </Link>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold truncate">{org.name}</h1>
-          <p className="text-muted-foreground text-sm">Twitch accounts</p>
-        </div>
-      </div>
+    <div className="max-w-4xl mx-auto w-full">
 
       {!canManage ? (
         <AccessDenied role={org.role} orgName={org.name} resource="Twitch accounts" />

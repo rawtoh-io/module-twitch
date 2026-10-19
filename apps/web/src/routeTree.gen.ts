@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as OOrgSlugRouteImport } from './routes/o/$orgSlug'
 import { Route as OOrgSlugIndexRouteImport } from './routes/o/$orgSlug/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -17,14 +18,20 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OOrgSlugIndexRoute = OOrgSlugIndexRouteImport.update({
-  id: '/o/$orgSlug/',
-  path: '/o/$orgSlug/',
+const OOrgSlugRoute = OOrgSlugRouteImport.update({
+  id: '/o/$orgSlug',
+  path: '/o/$orgSlug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const OOrgSlugIndexRoute = OOrgSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => OOrgSlugRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/o/$orgSlug': typeof OOrgSlugRouteWithChildren
   '/o/$orgSlug/': typeof OOrgSlugIndexRoute
 }
 export interface FileRoutesByTo {
@@ -34,19 +41,20 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/o/$orgSlug': typeof OOrgSlugRouteWithChildren
   '/o/$orgSlug/': typeof OOrgSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/o/$orgSlug/'
+  fullPaths: '/' | '/o/$orgSlug' | '/o/$orgSlug/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/o/$orgSlug'
-  id: '__root__' | '/' | '/o/$orgSlug/'
+  id: '__root__' | '/' | '/o/$orgSlug' | '/o/$orgSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  OOrgSlugIndexRoute: typeof OOrgSlugIndexRoute
+  OOrgSlugRoute: typeof OOrgSlugRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -58,19 +66,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/o/$orgSlug': {
+      id: '/o/$orgSlug'
+      path: '/o/$orgSlug'
+      fullPath: '/o/$orgSlug'
+      preLoaderRoute: typeof OOrgSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/o/$orgSlug/': {
       id: '/o/$orgSlug/'
-      path: '/o/$orgSlug'
+      path: '/'
       fullPath: '/o/$orgSlug/'
       preLoaderRoute: typeof OOrgSlugIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof OOrgSlugRoute
     }
   }
 }
 
+interface OOrgSlugRouteChildren {
+  OOrgSlugIndexRoute: typeof OOrgSlugIndexRoute
+}
+
+const OOrgSlugRouteChildren: OOrgSlugRouteChildren = {
+  OOrgSlugIndexRoute: OOrgSlugIndexRoute,
+}
+
+const OOrgSlugRouteWithChildren = OOrgSlugRoute._addFileChildren(
+  OOrgSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  OOrgSlugIndexRoute: OOrgSlugIndexRoute,
+  OOrgSlugRoute: OOrgSlugRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

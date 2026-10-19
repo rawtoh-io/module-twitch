@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@source "../node_modules/@rawtoh/module-ui/src";
 
 @custom-variant dark (&:is(.dark *));
 
