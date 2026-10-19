@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AccessDenied } from '@/components/access-denied'
-import { ArrowLeftIcon, PlusIcon, TrashIcon, KeyIcon, UnplugIcon, PlugIcon, RefreshCwIcon, ActivityIcon, TvIcon, TriangleAlertIcon, KeyRoundIcon } from 'lucide-react'
+import { ArrowLeftIcon, PlusIcon, TrashIcon, KeyIcon, UnplugIcon, PlugIcon, RefreshCwIcon, ActivityIcon, TvIcon, TriangleAlertIcon, KeyRoundIcon, SettingsIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import type { Account } from '@module-twitch/shared/validation'
@@ -45,6 +45,15 @@ function RouteComponent() {
         <AccessDenied role={org.role} orgName={org.name} resource="Twitch accounts" />
       ) : (
         <>
+          {accounts?.some((a) => !a.hasCredentials) && (
+            <Alert className="mb-4 border-yellow-500/40 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 [&>svg]:text-current">
+              <TriangleAlertIcon />
+              <AlertTitle>Not connected to Rawtoh</AlertTitle>
+              <AlertDescription>
+                An account below is not installed with Rawtoh yet, so your automations will not receive its events. Click Install with Rawtoh on that account.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="flex justify-end mb-4">
             <Button onClick={() => connectTwitch.mutate()} disabled={connectTwitch.isPending} className="w-full sm:w-auto">
               <PlusIcon />
@@ -120,6 +129,7 @@ function AccountCard({
   const deleteCredentials = useDeleteCredentials(orgId)
   const reauthorizeTwitch = useReauthorizeTwitch(orgId)
   const [enrollmentToken, setEnrollmentToken] = useState('')
+  const [advanced, setAdvanced] = useState(false)
 
   return (
     <>
@@ -173,7 +183,7 @@ function AccountCard({
               )}
               <Button variant="ghost" size="sm" onClick={() => setDrawerOpen(true)}>
                 <KeyIcon className="h-4 w-4" />
-                Credentials
+                Rawtoh instance
               </Button>
               <Button
                 variant="outline"
@@ -230,7 +240,7 @@ function AccountCard({
           </div>
           {rotated && (
             <p className="mt-3 text-sm text-yellow-600 dark:text-yellow-400">
-              This account was re-enrolled in Rawtoh, so its signing key is no longer trusted. Enroll again with a fresh token.
+              This account was re-enrolled in Rawtoh, so its signing key is no longer trusted. Delete the signing key, then click Install with Rawtoh again.
             </p>
           )}
         </CardHeader>
@@ -239,11 +249,16 @@ function AccountCard({
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent side="right">
           <SheetHeader>
-            <SheetTitle>Rawtoh instance — {account.twitchDisplayName}</SheetTitle>
+            <div className="flex items-center justify-between gap-2 pr-6">
+              <SheetTitle>Rawtoh instance — {account.twitchDisplayName}</SheetTitle>
+              {!account.hasCredentials && (
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" title="Advanced" onClick={() => setAdvanced(true)}><SettingsIcon className="h-4 w-4" /></Button>
+              )}
+            </div>
             <SheetDescription>
               {account.hasCredentials
                 ? `Instance ID: ${account.instanceId}`
-                : 'This account is not enrolled in Rawtoh yet.'}
+                : 'This account is not enrolled in Rawtoh yet. Install with Rawtoh does everything in one click: it creates the instance and connects it with your account.'}
             </SheetDescription>
           </SheetHeader>
           <div className="px-4 flex flex-col gap-4">
@@ -265,68 +280,74 @@ function AccountCard({
                   <PlugIcon className="h-4 w-4" />
                   {installAccount.isPending ? 'Installing…' : 'Install with Rawtoh'}
                 </Button>
-                <p className="text-muted-foreground text-sm">
-                  Provisions the module instance in Rawtoh automatically using your account.
-                </p>
               </div>
             )}
-            <details className="text-sm">
-              <summary className="text-muted-foreground cursor-pointer">Enrollment token (advanced)</summary>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  if (!enrollmentToken.trim()) return
-                  setCredentials.mutate(
-                    { accountId: account.id, enrollmentToken: enrollmentToken.trim() },
-                    {
-                      onSuccess: (data) => {
-                        if (data.warning) toast.warning(data.warning)
-                        else toast.success('Enrolled')
-                        setEnrollmentToken('')
-                        setDrawerOpen(false)
-                      },
-                      onError: (err) => toast.error(err.message),
-                    }
-                  )
-                }}
-                className="mt-3 flex flex-col gap-3"
-              >
-                <Input
-                  placeholder="Enrollment token (rth_e_...)"
-                  value={enrollmentToken}
-                  onChange={(e) => setEnrollmentToken(e.target.value)}
-                  className="font-mono"
-                />
-                <p className="text-muted-foreground text-xs">
-                  From Rawtoh → Module instances → Get enrollment token. Single use, valid 15 minutes.
-                </p>
-                <Button type="submit" disabled={!enrollmentToken.trim() || setCredentials.isPending}>
-                  Enroll
-                </Button>
-              </form>
-            </details>
           </div>
           <SheetFooter>
             {account.hasCredentials && (
               <Button
-                variant="outline"
+                variant="destructive"
                 onClick={() =>
                   deleteCredentials.mutate(account.id, {
                     onSuccess: () => {
-                      toast.success('Signing key deleted')
+                      toast.success('Uninstalled — the instance is still in your Rawtoh dashboard')
                       setDrawerOpen(false)
                     },
                     onError: (err) => toast.error(err.message),
                   })
                 }
               >
-                Delete signing key
+                Uninstall from Rawtoh
               </Button>
             )}
             <SheetClose asChild>
               <Button variant="ghost">Close</Button>
             </SheetClose>
           </SheetFooter>
+        </SheetContent>
+      </Sheet>
+      <Sheet open={advanced} onOpenChange={setAdvanced}>
+        <SheetContent side="right">
+          <SheetHeader>
+            <SheetTitle>Manual enrollment</SheetTitle>
+            <SheetDescription>From Rawtoh → Module instances → Get enrollment token. Single use, valid 15 minutes.</SheetDescription>
+          </SheetHeader>
+          <div className="px-4 text-sm space-y-3">
+            <Alert variant="destructive">
+              <TriangleAlertIcon className="h-4 w-4" />
+              <AlertTitle>Advanced: manual enrollment</AlertTitle>
+              <AlertDescription>Install with Rawtoh already does this for you. Only paste a token here if you created the instance by hand in the Rawtoh dashboard and know exactly what you are doing.</AlertDescription>
+            </Alert>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (!enrollmentToken.trim()) return
+                setCredentials.mutate(
+                  { accountId: account.id, enrollmentToken: enrollmentToken.trim() },
+                  {
+                    onSuccess: (data) => {
+                      if (data.warning) toast.warning(data.warning)
+                      else toast.success('Enrolled')
+                      setEnrollmentToken('')
+                      setDrawerOpen(false)
+                    },
+                    onError: (err) => toast.error(err.message),
+                  }
+                )
+              }}
+              className="mt-3 flex flex-col gap-3"
+            >
+              <Input
+                placeholder="Enrollment token (rth_e_...)"
+                value={enrollmentToken}
+                onChange={(e) => setEnrollmentToken(e.target.value)}
+                className="font-mono"
+              />
+              <Button type="submit" disabled={!enrollmentToken.trim() || setCredentials.isPending}>
+                Enroll
+              </Button>
+            </form>
+          </div>
         </SheetContent>
       </Sheet>
     </>
