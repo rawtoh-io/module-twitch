@@ -14,6 +14,7 @@ resources:
   - api.yaml
   - web.yaml
   - ingress.yaml
+  - backup.yaml
 labels:
   - pairs:
       app.kubernetes.io/part-of: module-twitch

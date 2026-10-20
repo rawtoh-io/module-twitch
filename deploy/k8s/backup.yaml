@@ -1,0 +1,84 @@
+# Nightly logical backup of this repo's PostgreSQL (`twitch` on twitch-postgres) to the
+# shared OVHcloud bucket `rawtoh-backup` (region gra), under module-twitch/.
+#
+# The init container dumps the database (pg_dump custom format: compressed,
+# restorable per table with pg_restore) into an emptyDir; the main container
+# uploads it to rawtoh-backup/module-twitch/<UTC timestamp>.dump and prunes this
+# repo's dumps older than RETENTION.
+#
+# Credentials: OVH keys in the shared `backup-s3` Secret (created once, see
+# DEPLOYMENT.md "Backups" in rawtoh-io/app); the database password comes from
+# twitch-secrets.
+#
+# Run now:  kubectl -n rawtoh create job --from=cronjob/twitch-db-backup twitch-db-backup-manual
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: twitch-db-backup
+  namespace: rawtoh
+spec:
+  schedule: "15 3 * * *"
+  timeZone: Etc/UTC
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 604800
+      template:
+        spec:
+          restartPolicy: Never
+          volumes:
+            - name: dumps
+              emptyDir: {}
+          initContainers:
+            - name: dump
+              # Same major version as the server (pg_dump must not be older).
+              image: postgres:17-alpine
+              command: ["pg_dump", "-h", "twitch-postgres", "-U", "rawtoh", "-d", "twitch", "-Fc", "-f", "/dumps/twitch.dump"]
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: twitch-secrets
+                      key: POSTGRES_PASSWORD
+              volumeMounts:
+                - name: dumps
+                  mountPath: /dumps
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits: { memory: 256Mi }
+          containers:
+            - name: upload
+              image: pgsty/mc:RELEASE.2026-10-18T00-00-00Z
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -eu
+                  mc alias set ovh https://s3.gra.io.cloud.ovh.net "$S3_ACCESS_KEY" "$S3_SECRET_KEY" --api S3v4 --path on >/dev/null
+                  dest="ovh/rawtoh-backup/module-twitch/$(date -u +%Y-%m-%dT%H%MZ).dump"
+                  mc cp --quiet /dumps/twitch.dump "$dest"
+                  mc stat "$dest"
+                  mc rm --recursive --force --older-than "$RETENTION" ovh/rawtoh-backup/module-twitch/ || echo "prune failed (backup itself is fine)"
+              env:
+                - name: RETENTION
+                  value: 30d
+                - name: MC_CONFIG_DIR
+                  value: /tmp/mc
+                - name: S3_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: S3_ACCESS_KEY
+                - name: S3_SECRET_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-s3
+                      key: S3_SECRET_KEY
+              volumeMounts:
+                - name: dumps
+                  mountPath: /dumps
+              resources:
+                requests: { cpu: 50m, memory: 64Mi }
+                limits: { memory: 256Mi }
