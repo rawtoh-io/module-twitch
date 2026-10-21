@@ -21,7 +21,6 @@ function RouteComponent() {
       onSelectOrg={(o) => navigate({ to: '/o/$orgSlug', params: { orgSlug: o.slug } })}
       onLogout={logout}
       resource="Twitch accounts"
-      contentClassName="flex-1 overflow-auto p-6"
     >
       <Outlet />
     </ModuleShell>
