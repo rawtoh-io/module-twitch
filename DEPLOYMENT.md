@@ -36,12 +36,18 @@ Set the OAuth redirect URL to `https://twitch.rawtoh.io/callback/twitch` and not
 
 **Where:** copy `deploy/k8s/bootstrap/secrets.example.yaml` → `deploy/k8s/bootstrap/secrets.yaml` (gitignored), fill it in, then `kubectl apply -f deploy/k8s/bootstrap/secrets.yaml`.
 
+The module uses the platform's PostgreSQL (`postgres` Service, user `rawtoh`, password `POSTGRES_PASSWORD` from `rawtoh-secrets`). Create its database once, before the first deploy:
+
+```sh
+kubectl -n rawtoh exec deploy/postgres -- createdb -U rawtoh twitch
+```
+
 **Example:**
 
 ```yaml
 stringData:
-  POSTGRES_PASSWORD: W6mR2kX9vN4pL8sQ
-  DATABASE_URL: postgres://rawtoh:W6mR2kX9vN4pL8sQ@twitch-postgres:5432/twitch
+  # Password of the platform's rawtoh user (POSTGRES_PASSWORD in rawtoh-secrets)
+  DATABASE_URL: postgres://rawtoh:W6mR2kX9vN4pL8sQ@postgres:5432/twitch
   SESSION_SECRET: h4Jk8M2nB6vC9xZ3qW7eR5tY1uI0oP4a   # openssl rand -base64 32
   # Encrypts the Ed25519 private keys at rest. Distinct from SESSION_SECRET:
   # rotating the session secret only logs users out, rotating this one makes

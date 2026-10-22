@@ -9,8 +9,6 @@ metadata:
 data:
   PUBLIC_DOMAIN: twitch.$DOMAIN
   APP_URL: https://twitch.$DOMAIN
-  POSTGRES_USER: rawtoh
-  POSTGRES_DB: twitch
   # Rawtoh platform
   RAWTOH_ISSUER: https://app.$DOMAIN/api/auth
   RAWTOH_APP_URL: https://app.$DOMAIN
